@@ -11,5 +11,10 @@ router.post("/login", login)
 
 router.get("/tes", testeGoogle)
 
+router.post("/logout", (req, res) => {
+    res.json({ auth: false, token: null })
+    console.log("Deslogado!");
+})
+
 
 module.exports = router
