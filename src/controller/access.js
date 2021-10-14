@@ -1,26 +1,19 @@
 const { sendMessage } = require("../controller/logsSlack")
 const moment = require("moment")
 const jwt = require("jsonwebtoken")
-
-const userTeste = {
-    "id":55,
-    "userName":"antsu",
-    "name":"Anderson",
-    "email":"anderson@anderson.com",
-    "address": "Rua Teste",
-    "telephone": "11948039943",
-    "pass": "adm"
-}
+const bcrypt = require("bcrypt")
+const modelUser = require("../model/user")
 
 async function login (req, res) {
 
-    const body = req.body
+    const { userName, pass } = req.body
 
-    const idUser = userTeste.id
+    const user = await modelUser.findOne({ userName: userName })
+    const id = user._id
 
     try{
-        if (body.userName == userTeste.userName && body.pass == userTeste.pass){
-            const token = jwt.sign({ idUser }, process.env.SECRET, {
+        if (userName == user.userName && bcrypt.compare(pass, user.pass)){
+            const token = jwt.sign({ id }, process.env.SECRET, {
                 expiresIn: 10000
             })
             return res.status(200).json({
@@ -30,7 +23,7 @@ async function login (req, res) {
         }
         else{
             
-            const userName = body.userName == userTeste.userName
+            const userName = userName == user.userName
             
             console.log(userName);
 
@@ -41,7 +34,7 @@ async function login (req, res) {
                     break;
             
                 case true:
-                    await sendMessage(`${body.userName} password missmatch`)
+                    await sendMessage(`${userName} password missmatch`)
                     console.log("senha");
                     break;
             }
@@ -54,6 +47,11 @@ async function login (req, res) {
         return res.status(500).json({status:error})
     }
 
+}
+
+function forgotPassword(req, res) {
+
+    
 }
 
 module.exports = {

@@ -1,5 +1,5 @@
 const express = require("express")
-const mongoose = require("mongoose")
+const db = require("./src/db/connect")
 const routes = require("./src/routes")
 const cors = require("cors")
 require("dotenv/config")
@@ -9,6 +9,7 @@ const PORT = process.env.PORT
 
 
 app.use(cors())
+app.db = db
 app.use(express.json())
 app.use(routes)
 
