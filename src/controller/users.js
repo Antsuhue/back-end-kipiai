@@ -32,7 +32,8 @@ async function createUsers(req, res) {
             "name": name,
             "userName": userName,
             "email": email,
-            "pass": hash
+            "pass": hash,
+            "aproved": false
 
          })
 

@@ -24,6 +24,10 @@ const user = new mongoose.Schema({
     },
     expireDateToken:{
         type:Date
+    },
+    aproved:{
+        type: Boolean,
+        require: true
     }
 })
 

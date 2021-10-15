@@ -13,13 +13,18 @@ async function login (req, res) {
 
     try{
         if (userName == user.userName && bcrypt.compare(pass, user.pass)){
-            const token = jwt.sign({ id }, process.env.SECRET, {
-                expiresIn: 10000
-            })
-            return res.status(200).json({
-                auth: true,
-                token: token    
-            })
+            if(user.aproved == true){
+                const token = jwt.sign({ id }, process.env.SECRET, {
+                    expiresIn: 10000
+                })
+
+                return res.status(200).json({
+                    auth: true,
+                    token: token    
+                })
+            }else{
+                return res.status(400).json({status:"User not aproved, contact the administrator!"})
+            }
         }
         else{
             
