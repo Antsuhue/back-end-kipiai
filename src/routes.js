@@ -2,6 +2,7 @@ const express = require("express")
 const router = express.Router()
 const { verifyToken } = require("./middleware/jwt")
 const { login } = require('./controller/access')
+const { sendEmail } = require("./controller/forgotPassword")
 const { testeGoogle, createUsers } = require('./controller/users')
 
 router.get("/", (req,res) => {
@@ -22,7 +23,7 @@ router.get("/testeList", verifyToken, (req, res) => {
     return res.status(200).json(lista)
 })
 
-router.post("/forgot_password", )
+router.post("/forgot_password", sendEmail)
 
 router.post("/logout", (req, res) => {
     res.json({ auth: false, token: null })

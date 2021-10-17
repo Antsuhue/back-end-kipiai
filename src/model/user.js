@@ -19,11 +19,13 @@ const user = new mongoose.Schema({
         type: String,
         require: true
     },
-    forgotToken:{
-        type: String
+    passwordResetToken:{
+        type: String,
+        select: false
     },
-    expireDateToken:{
-        type:Date
+    passwordResetExpires:{
+        type:Date,
+        select: false
     },
     aproved:{
         type: Boolean,
