@@ -25,6 +25,11 @@ router.get("/testeList", verifyToken, (req, res) => {
 
 router.post("/forgot_password", sendEmail)
 
+router.get("/change_password", (req,res) => {
+    return res.status(200).json({status:"Redefina sua senha aqui!"})
+
+})
+
 router.post("/logout", (req, res) => {
     res.json({ auth: false, token: null })
     console.log("Deslogado!");

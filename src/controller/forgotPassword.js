@@ -10,6 +10,7 @@ async function sendEmail(req, res) {
     try {
 
         const user = await modelUser.findOne({ email: email })
+        console.log(user);
 
     if(!user){
 
@@ -36,14 +37,16 @@ async function sendEmail(req, res) {
             to: email,
             from: "andersonjulio15@gmail.com",
             template: "auth/forgot_Password",
+            subject:"Alteração de senha - Kipiai",
             context: { token }
         }, (err,res) => {
             if (err){
                 console.log(err)
-            }else{
-                return res.status(200).json({ status:"E-mail has sended!" })
             }
         })
+
+        return res.status(200).json({ status:"E-mail has sended!" })
+            
 
     } catch (error) { 
         console.log(error)
