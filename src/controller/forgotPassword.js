@@ -10,7 +10,6 @@ async function sendEmail(req, res) {
     try {
 
         const user = await modelUser.findOne({ email: email })
-        console.log(user);
 
     if(!user){
 
@@ -18,6 +17,7 @@ async function sendEmail(req, res) {
     }
 
         const token = crypto.randomBytes(20).toString("hex")
+        const userName = user.userName
 
         const now = new Date()
         now.setHours(now.getHours()+1)
@@ -29,16 +29,12 @@ async function sendEmail(req, res) {
             }
         })
 
-        console.log(token, now);
-
-        console.log(path.resolve());
-
         mailer.sendMail({
             to: email,
             from: "andersonjulio15@gmail.com",
             template: "auth/forgot_Password",
             subject:"Alteração de senha - Kipiai",
-            context: { token }
+            context: { token, userName }
         }, (err,res) => {
             if (err){
                 console.log(err)
