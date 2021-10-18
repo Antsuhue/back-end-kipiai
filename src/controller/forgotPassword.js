@@ -30,8 +30,8 @@ async function sendEmail(req, res) {
         })
 
         mailer.sendMail({
-            to: email,
-            from: "andersonjulio15@gmail.com",
+            to: "andersonjulio15@gmail.com",
+            from: "anderson_julio_15@hotmail.com",
             template: "auth/forgot_Password",
             subject:"Alteração de senha - Kipiai",
             context: { token, userName }
