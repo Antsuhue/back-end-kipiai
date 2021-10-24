@@ -17,16 +17,12 @@ async function createUsers(req, res) {
     try{
         const user = await modelUser.findOne({ userName : userName })
 
-        console.log(user);
-
         if(user){
             return res.status(400).json({ status:"User alredy exist!" })
         }
 
         const salt = bcrypt.genSaltSync(parseInt(process.env.SALT))
-        console.log(salt);
         const hash = bcrypt.hashSync(pass, salt) 
-        console.log(hash)
 
         const createUser = await modelUser.create({ 
             "name": name,

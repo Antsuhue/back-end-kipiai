@@ -13,10 +13,12 @@ async function login (req, res) {
     const { userName, pass } = req.body
 
     const user = await modelUser.findOne({ userName: userName })
-    const id = user._id
+
+    const authPass = await bcrypt.compare(pass, user.pass)
 
     try{
-        if (userName == user.userName && bcrypt.compare(pass, user.pass)){
+        if (userName == user.userName && authPass == true){
+            const id = user._id
             if(user.aproved == true){
                 const token = jwt.sign({ id }, process.env.SECRET, {
                     expiresIn: 10000
@@ -53,7 +55,7 @@ async function login (req, res) {
     }
     catch(error){
         console.log(error);
-        return res.status(500).json({status:error})
+        return res.status(404).json({status:"Erro de autenticação usuario e senha não conferem!"})
     }
 
 }
@@ -131,8 +133,13 @@ async function verifyTokenLink(req,res) {
 async function changePassword(req, res) {
     const reciviedToken = req.query.token
     const { pass } = req.body
+    const user = await modelUser.findOne({
+        passwordResetToken: reciviedToken
+    })
 
-    await model.findByIdAndUpdate(user._id, {
+    console.log(user);
+    
+    await modelUser.findByIdAndUpdate(user._id, {
         "$set": {
             "pass": pass
         }

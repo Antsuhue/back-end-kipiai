@@ -1,7 +1,7 @@
 const express = require("express")
 const router = express.Router()
 const { verifyToken } = require("./middleware/jwt")
-const { login, sendEmail, changePass } = require('./controller/access')
+const { login, sendEmail, changePassword } = require('./controller/access')
 const { testeGoogle, createUsers } = require('./controller/users')
 
 router.get("/", (req,res) => {
@@ -24,11 +24,7 @@ router.get("/testeList", verifyToken, (req, res) => {
 
 router.post("/forgot_password", sendEmail)
 
-router.get("/change_password/", (req,res) => {
-    console.log(req.query.token);
-    return res.status(200).json({status:"Redefina sua senha aqui!"})
-
-})
+router.post("/change_password/", changePassword)
 
 router.post("/logout", (req, res) => {
     res.json({ auth: false, token: null })
