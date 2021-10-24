@@ -25,8 +25,8 @@ router.get("/testeList", verifyToken, (req, res) => {
 
 router.post("/forgot_password", sendEmail)
 
-router.get("/change_password/:token", (req,res) => {
-    console.log(req.params.token);
+router.get("/change_password/", (req,res) => {
+    console.log(req.query.token);
     return res.status(200).json({status:"Redefina sua senha aqui!"})
 
 })

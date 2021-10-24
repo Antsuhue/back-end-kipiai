@@ -2,6 +2,7 @@ const modelUser = require("../model/user")
 const crypto = require("crypto")
 const mailer = require("../module/mailer")
 const path = require("path")
+const URL = "http://localhost:4000"
 
 async function sendEmail(req, res) {
 
@@ -34,7 +35,7 @@ async function sendEmail(req, res) {
             from: "anderson_julio_15@hotmail.com",
             template: "auth/forgot_Password",
             subject:"Alteração de senha - Kipiai",
-            context: { token, userName }
+            context: { token, userName, URL }
         }, (err,res) => {
             if (err){
                 console.log(err)

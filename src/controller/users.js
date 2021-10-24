@@ -44,7 +44,6 @@ async function createUsers(req, res) {
         return res.status(401).json({ status:"Failed to create a user try again!" })
     }
 
-
 }
 
 module.exports = { testeGoogle, createUsers }
