@@ -1,6 +1,7 @@
 const axios = require("axios")
 const bcrypt = require("bcrypt")
 const modelUser = require("../model/user")
+const { sendMessage } = require("./logsSlack")
 require("dotenv")
 
 async function testeGoogle(req, res) {
@@ -12,7 +13,9 @@ async function testeGoogle(req, res) {
 
 async function createUsers(req, res) {
 
-    const { userName, name, email, pass } = req.body
+    let { userName, name, email, pass } = req.body
+
+    userName = userName.toLowerCase()
 
     try{
         const user = await modelUser.findOne({ userName : userName })
@@ -25,15 +28,17 @@ async function createUsers(req, res) {
         const hash = bcrypt.hashSync(pass, salt) 
 
         const createUser = await modelUser.create({ 
-            "name": name,
+            "name": name.toLowerCase(),
             "userName": userName,
-            "email": email,
+            "email": email.toLowerCase(),
             "pass": hash,
             "aproved": false
 
          })
 
-         return res.status(200).json({ createUser })
+        await sendMessage("Usuario Criado com sucesso!")
+
+        return res.status(200).json({ createUser })
 
     }catch(error){
         console.log(error);

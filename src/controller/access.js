@@ -5,12 +5,14 @@ const bcrypt = require("bcrypt")
 const modelUser = require("../model/user")
 const crypto = require("crypto")
 const path = require("path")
-const { sendMessage } = require("../controller/logsSlack")
+const { logMessageAccess, logEmail } = require("../controller/logsSlack")
 
 
 async function login (req, res) {
 
-    const { userName, pass } = req.body
+    let { userName, pass } = req.body
+
+    userName = userName.toLowerCase()
 
     const user = await modelUser.findOne({ userName: userName })
 
@@ -34,19 +36,17 @@ async function login (req, res) {
         }
         else{
             
-            const userName = userName == user.userName
+            const verifyUserName = userName == user.userName
             
-            console.log(userName);
+            console.log(verifyUserName);
 
-            switch (userName) {
+            switch (verifyUserName) {
                 case false:
-                    console.log("nome");
-                    await sendMessage(`username missmatch`)
+                    await logMessageAccess(`username missmatch`)
                     break;
             
                 case true:
-                    await sendMessage(`${userName} password missmatch`)
-                    console.log("senha");
+                    await logMessageAccess(`${userName} password missmatch`)
                     break;
             }
             
@@ -62,7 +62,9 @@ async function login (req, res) {
 
 async function sendEmail(req, res) {
 
-    const { email } = req.body
+    let { email } = req.body
+
+    email = email.toLowerCase()
 
     try {
 
@@ -88,7 +90,7 @@ async function sendEmail(req, res) {
         })
 
         mailer.sendMail({
-            to: "andersonjulio15@gmail.com",
+            to: user.email,
             from: "anderson_julio_15@hotmail.com",
             template: "auth/forgot_Password",
             subject:"Alteração de senha - Kipiai",
@@ -98,6 +100,8 @@ async function sendEmail(req, res) {
                 console.log(err)
             }
         })
+
+        await logEmail(`Message has sended to ${user.email}`)
 
         return res.status(200).json({ status:"E-mail has sended!" })
             
@@ -133,15 +137,28 @@ async function verifyTokenLink(req,res) {
 async function changePassword(req, res) {
     const reciviedToken = req.query.token
     const { pass } = req.body
+    const now = new Date()
     const user = await modelUser.findOne({
         passwordResetToken: reciviedToken
     })
 
-    console.log(user);
+    if (!user){
+        return res.status(400).json({ status: "Link inválido!"})
+    }
+
+    if (user.passwordResetExpires <= now){
+        return res.status(400).json({ status: "Link expirado"})
+    }
+
+    const salt = bcrypt.genSaltSync(parseInt(process.env.SALT))
+    const hash = bcrypt.hashSync(pass, salt) 
+
+    const newDate = now.setHours(now.getHours()-99)
     
     await modelUser.findByIdAndUpdate(user._id, {
         "$set": {
-            "pass": pass
+            "pass": hash,
+            "passwordResetExpires": newDate
         }
     })
     return res.status(200).json({status:"Senha alterada"})

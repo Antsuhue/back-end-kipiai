@@ -24,8 +24,7 @@ const user = new mongoose.Schema({
         select: false
     },
     passwordResetExpires:{
-        type:Date,
-        select: false
+        type:Date
     },
     aproved:{
         type: Boolean,
