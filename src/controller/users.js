@@ -1,7 +1,7 @@
 const axios = require("axios")
 const bcrypt = require("bcrypt")
 const modelUser = require("../model/user")
-const { sendMessage } = require("./logsSlack")
+const { logsCreateUser, logsApproved, logsDisapproved } = require("./logsSlack")
 require("dotenv")
 
 async function testeGoogle(req, res) {
@@ -32,11 +32,11 @@ async function createUsers(req, res) {
             "userName": userName,
             "email": email.toLowerCase(),
             "pass": hash,
-            "aproved": false
+            "approved": false
 
          })
 
-        await sendMessage("Usuario Criado com sucesso!")
+        await logsCreateUser("Usuario Criado com sucesso!")
 
         return res.status(200).json({ createUser })
 
@@ -47,4 +47,74 @@ async function createUsers(req, res) {
 
 }
 
-module.exports = { testeGoogle, createUsers }
+function changePermission(req, res){
+    const {action, userName} = req.body
+
+    switch (action) {
+        case "approve":
+            approveUser(userName, res)
+        break
+
+        case "disapprove":
+            disapproveUser(userName, res)
+    }
+}
+
+// Usuario master terá a possibilidade de aprovar usuario no uso da plataforma.
+
+async function approveUser(userName, res){
+
+    const user = await modelUser.findOne({ userName:userName })
+
+    // Verificação se usuario existe.
+    if(!user){
+        return res.status(404).json({ status:"Usuario não encontrado!" })
+    }
+
+    // Alterar aprovação do usuario na base de dados.
+    try{
+    await modelUser.findByIdAndUpdate(user._id, {
+        "$set":{
+            "approved":true
+        }
+    })
+    await logsApproved(`${user.userName} has change your status to aproved`)
+                return res.status(200).json({status: "Sucess to approve user!" })
+    
+    }
+    catch (err){
+        return res.status(400).json({status:`Error to aprove user, ${err}`})
+          
+    }
+
+}
+
+async function disapproveUser(userName, res){
+
+    const user = await modelUser.findOne({ userName:userName })
+
+    // Verificação se usuario existe.
+    if(!user){
+        return res.status(404).json({ status:"Usuario não encontrado!" })
+    }
+
+    // Alterar aprovação do usuario na base de dados.
+    try{
+    await modelUser.findByIdAndUpdate(user._id, {
+        "$set":{
+            "approved":false
+        }
+    })
+    await logsDisapproved (`${user.userName} has change your status to disapproved`)
+                return res.status(200).json({status: "Sucess to disapprove user!" })
+    
+    }
+    catch (err){
+        return res.status(400).json({status:`Error to disaprove user, ${err}`})
+          
+    }
+
+}
+
+
+module.exports = { testeGoogle, createUsers, changePermission }

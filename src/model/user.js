@@ -26,7 +26,7 @@ const user = new mongoose.Schema({
     passwordResetExpires:{
         type:Date
     },
-    aproved:{
+    approved:{
         type: Boolean,
         require: true
     }

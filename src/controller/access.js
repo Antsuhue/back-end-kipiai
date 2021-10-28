@@ -57,7 +57,6 @@ async function login (req, res) {
         console.log(error);
         return res.status(404).json({status:"Erro de autenticação usuario e senha não conferem!"})
     }
-
 }
 
 async function sendEmail(req, res) {
