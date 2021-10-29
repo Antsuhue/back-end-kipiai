@@ -5,6 +5,7 @@ const bcrypt = require("bcrypt")
 const modelUser = require("../model/user")
 const crypto = require("crypto")
 const path = require("path")
+const { logsAccess } = require("../controller/logsGenerate")
 const { logMessageAccess, logEmail } = require("../controller/logsSlack")
 
 
@@ -31,6 +32,7 @@ async function login (req, res) {
                     token: token    
                 })
             }else{
+                logsAccess(userName,`Administrator not approved user ${userName}`)
                 return res.status(400).json({status:"User not aproved, contact the administrator!"})
             }
         }
@@ -46,7 +48,8 @@ async function login (req, res) {
                     break;
             
                 case true:
-                    await logMessageAccess(`${userName} password missmatch`)
+                    logsAccess(userName,`${userName} password missmatch`)
+                    await logMessageAccess()
                     break;
             }
             
@@ -99,7 +102,7 @@ async function sendEmail(req, res) {
                 console.log(err)
             }
         })
-
+        logsAccess(user.userName,`Message has sended to ${user.email}`)
         await logEmail(`Message has sended to ${user.email}`)
 
         return res.status(200).json({ status:"E-mail has sended!" })

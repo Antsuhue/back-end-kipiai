@@ -1,5 +1,7 @@
 const mongoose = require("mongoose")
-const uri = "mongodb+srv://anderson:doka1@tikos-project.ugnaf.gcp.mongodb.net/kipiai?retryWrites=true&w=majority"
+require("dotenv/config")
+
+const uri = process.env.MONGO_URI
 var options = {
     useUnifiedTopology: true,
     useNewUrlParser: true
