@@ -1,5 +1,4 @@
 const mailer = require("../module/mailer")
-const moment = require("moment")
 const jwt = require("jsonwebtoken")
 const bcrypt = require("bcrypt")
 const modelUser = require("../model/user")
@@ -69,7 +68,7 @@ async function sendEmail(req, res) {
     email = email.toLowerCase()
 
     try {
-
+        const { userHot } = require("../config/mail.json")
         const user = await modelUser.findOne({ email: email })
         const URL = "http://localhost:4000/"
 
@@ -93,7 +92,7 @@ async function sendEmail(req, res) {
 
         mailer.sendMail({
             to: user.email,
-            from: "anderson_julio_15@hotmail.com",
+            from: userHot,
             template: "auth/forgot_Password",
             subject:"Alteração de senha - Kipiai",
             context: { token, userName, URL }
@@ -113,6 +112,34 @@ async function sendEmail(req, res) {
         console.log("Error on forgot email!");
     }
     
+}
+
+// Criação de função para verificação de email cadastrado.
+
+async function emailConfirmation (id, email){
+
+    const { userHot } = require("../config/mail.json")
+
+    const token = jwt.sign({ id }, process.env.SECRET, {
+        expiresIn: 10000
+    })
+
+
+    try{
+
+        mailer.sendMail({
+            to: email,
+            from: userHot,
+            template: "auth/verification",
+            subject: "Verificação de email - Kipiai",
+            context: {}
+        }, async (err,res) => {
+            await logEmail(`Message verification link has sended to ${email}`)
+        })
+    }
+    catch(err){
+        console.log(err);
+    }
 }
 
 async function verifyTokenLink(req,res) {
@@ -170,5 +197,6 @@ module.exports = {
     login,
     sendEmail,
     changePassword,
-    verifyTokenLink
+    verifyTokenLink,
+    emailConfirmation
 }
