@@ -1,6 +1,7 @@
 const axios = require("axios")
 const bcrypt = require("bcrypt")
 const modelUser = require("../model/user")
+const { emailConfirmation } = require("./access")
 const { logsCreateUser, logsApproved, logsDisapproved } = require("./logsSlack")
 require("dotenv")
 
@@ -27,7 +28,7 @@ async function createUsers(req, res) {
         const salt = bcrypt.genSaltSync(parseInt(process.env.SALT))
         const hash = bcrypt.hashSync(pass, salt) 
 
-        const createUser = await modelUser.create({ 
+        var createUser = new modelUser({ 
             "name": name.toLowerCase(),
             "userName": userName,
             "email": email.toLowerCase(),
@@ -35,6 +36,8 @@ async function createUsers(req, res) {
             "approved": false
 
          })
+
+        
 
         await logsCreateUser("Usuario Criado com sucesso!")
 
