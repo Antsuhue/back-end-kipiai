@@ -17,6 +17,7 @@ async function login (req, res) {
 
     const user = await modelUser.findOne({ userName: userName })
 
+
     const authPass = await bcrypt.compare(pass, user.pass)
 
     try{
