@@ -2,6 +2,7 @@ const axios = require("axios")
 const bcrypt = require("bcrypt")
 const modelUser = require("../model/user")
 const { emailConfirmation } = require("./access")
+const { logsAccess } = require("./logsGenerate")
 const { logsCreateUser, logsApproved, logsDisapproved } = require("./logsSlack")
 require("dotenv")
 
@@ -33,15 +34,21 @@ async function createUsers(req, res) {
             "userName": userName,
             "email": email.toLowerCase(),
             "pass": hash,
-            "approved": false
+            "approved": false,
+            "emailConfirmed": false
 
          })
 
+        const doc = await createUser.save()
+
         
+        await emailConfirmation(doc._id, doc.email)
+        
+        logsAccess(doc.userName, `Usuário ${doc.userName} foi criado`, "info")
 
         await logsCreateUser("Usuario Criado com sucesso!")
 
-        return res.status(200).json({ createUser })
+        return res.status(200).json({ doc })
 
     }catch(error){
         console.log(error);
@@ -81,7 +88,7 @@ async function approveUser(userName, res){
             "approved":true
         }
     })
-    await logsApproved(`${user.userName} has change your status to aproved`)
+    await logsApproved(`${user.userName} has change your status to aproved`, "info")
                 return res.status(200).json({status: "Sucess to approve user!" })
     
     }
@@ -108,7 +115,7 @@ async function disapproveUser(userName, res){
             "approved":false
         }
     })
-    await logsDisapproved (`${user.userName} has change your status to disapproved`)
+    await logsDisapproved (`${user.userName} has change your status to disapproved`, "info")
                 return res.status(200).json({status: "Sucess to disapprove user!" })
     
     }

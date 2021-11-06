@@ -32,7 +32,7 @@ async function login (req, res) {
                     token: token    
                 })
             }else{
-                logsAccess(userName,`Administrator not approved user ${userName}`)
+                logsAccess(userName,`Administrator not approved user ${userName}`, "error")
                 return res.status(400).json({status:"User not aproved, contact the administrator!"})
             }
         }
@@ -102,7 +102,7 @@ async function sendEmail(req, res) {
                 console.log(err)
             }
         })
-        logsAccess(user.userName,`Message has sended to ${user.email}`)
+        logsAccess(user.userName,`Message has sended to ${user.email}`, "info")
         await logEmail(`Message has sended to ${user.email}`)
 
         return res.status(200).json({ status:"E-mail has sended!" })
@@ -120,20 +120,28 @@ async function sendEmail(req, res) {
 async function emailConfirmation (id, email){
 
     const { userHot } = require("../config/mail.json")
-
-    const token = jwt.sign({ id }, process.env.SECRET, {
-        expiresIn: 10000
-    })
-
+    const URL = "http://localhost:4000/"
 
     try{
 
+        const token = crypto.randomBytes(20).toString("hex")
+        
+        const now = new Date()
+        now.setHours(now.getHours()+999)
+
+        await modelUser.findByIdAndUpdate(id, {
+            "$set": {
+                "emailTokenValidation": token,
+                "emailConfirmationExpires": now
+            }
+        })
+
         mailer.sendMail({
-            to: email,
+            to: "andersonjulio15@gmail.com",
             from: userHot,
             template: "auth/verification",
             subject: "Verificação de email - Kipiai",
-            context: {}
+            context: {token, URL}
         }, async (err,res) => {
             await logEmail(`Message verification link has sended to ${email}`)
         })
@@ -141,6 +149,29 @@ async function emailConfirmation (id, email){
     catch(err){
         console.log(err);
     }
+}
+
+async function setConfirmation(req, res) {
+    const { token } = req.query
+
+    const user = await modelUser.findOne({ emailTokenValidation:token })
+
+    if (!user){
+        return res.status(400).json({ status: "link invalid!"})
+    }
+
+    if ( user.emailTokenValidation == true){
+        return res.status(200).json({ status:"email already validate!" })
+    }
+
+    await modelUser.findByIdAndUpdate(user._id, {
+        "$set": {
+            "emailConfirmed": true,
+        }
+    })
+    logsAccess(user.userName,`${user.email} has confirmed`, "info")
+    return res.status(200).json({token:"email validate!"})
+    
 }
 
 async function verifyTokenLink(req,res) {
@@ -172,7 +203,7 @@ async function changePassword(req, res) {
         passwordResetToken: reciviedToken
     })
 
-    if (!user){
+    if (!user)  {
         return res.status(400).json({ status: "Link inválido!"})
     }
 
@@ -199,5 +230,6 @@ module.exports = {
     sendEmail,
     changePassword,
     verifyTokenLink,
-    emailConfirmation
+    emailConfirmation,
+    setConfirmation
 }

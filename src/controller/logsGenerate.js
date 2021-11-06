@@ -1,7 +1,7 @@
 const winston = require("winston")
 require("dotenv/config")
 
-function logsAccess (name, menssage){
+function logsAccess (name, message, type){
     const logsConfiguration = {
         transports : [
             new winston.transports.Console(),
@@ -21,7 +21,15 @@ function logsAccess (name, menssage){
     }
     const logger = winston.createLogger(logsConfiguration)
 
-    logger.error(menssage)
+    switch (type) {
+        case "error":
+            logger.error(message)
+            break;
+    
+        case "info":
+            logger.info(message)
+            break;
+    }
 }
 
 

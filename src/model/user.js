@@ -26,7 +26,18 @@ const user = new mongoose.Schema({
     passwordResetExpires:{
         type:Date
     },
+    emailTokenValidation:{
+        type: String,
+        select: false
+    },
+    emailConfirmationExpires:{
+        type:Date
+    },
     approved:{
+        type: Boolean,
+        require: true
+    },
+    emailConfirmed:{
         type: Boolean,
         require: true
     }
