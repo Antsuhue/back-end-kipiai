@@ -13,6 +13,25 @@ async function testeGoogle(req, res) {
     return res.json({"status":te.status}).status(200)
 }
 
+async function listUsers(req, res){
+    const users = await modelUser.find()
+
+    let listUsers = []
+
+    users.forEach(usr => {
+        let usrObject = {
+            name: usr.name,
+            userName: usr.userName,
+            email: usr.email,
+            approved: usr.approved,
+            emailConfirmed: usr.emailConfirmed
+        }
+        listUsers.push(usrObject)
+    });
+
+    return res.status(200).json(listUsers)
+}
+
 async function createUsers(req, res) {
 
     let { userName, name, email, pass } = req.body
@@ -127,4 +146,6 @@ async function disapproveUser(userName, res){
 }
 
 
-module.exports = { testeGoogle, createUsers, changePermission }
+
+
+module.exports = { testeGoogle, createUsers, changePermission, listUsers }

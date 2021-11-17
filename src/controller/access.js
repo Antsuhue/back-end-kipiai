@@ -22,7 +22,7 @@ async function login (req, res) {
     try{
         if (userName == user.userName && authPass == true){
             const id = user._id
-            if(user.aproved == true){
+            if(user.approved == true){
                 const token = jwt.sign({ id }, process.env.SECRET, {
                     expiresIn: 10000
                 })
@@ -137,7 +137,7 @@ async function emailConfirmation (id, email){
         })
 
         mailer.sendMail({
-            to: "andersonjulio15@gmail.com",
+            to: email,
             from: userHot,
             template: "auth/verification",
             subject: "Verificação de email - Kipiai",
