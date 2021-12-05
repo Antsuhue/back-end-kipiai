@@ -1,9 +1,9 @@
 {
-    "host": "smtp.mailtrap.io",
+    "host": "smtp.gmail.com",
     "port": 2525,
     "user": "bff159fc0173f0",
     "pass": "76af8ee13d623b",
-    "service": "hotmail",
-    "userHot": "anderson_julio_15@hotmail.com",
-    "passHot": "XAndersonX15"
+    "service": "gmail",
+    "userHot": "contatokipiai@gmail.com",
+    "passHot": "Kipiai@2021"
 }

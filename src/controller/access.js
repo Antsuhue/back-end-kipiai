@@ -64,13 +64,18 @@ async function login (req, res) {
 
 async function sendEmail(req, res) {
 
-    let { email } = req.body
+    let { access } = req.body
 
-    email = email.toLowerCase()
+    cred = access.toLowerCase()
 
     try {
         const { userHot } = require("../config/mail.json")
-        const user = await modelUser.findOne({ email: email })
+        const user = await modelUser.findOne({
+            $or:[
+            { "email": cred },
+            { "userName": cred }
+        ]   
+    })
         const URL = "http://localhost:4000/"
 
     if(!user){
