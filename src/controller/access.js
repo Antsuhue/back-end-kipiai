@@ -72,11 +72,11 @@ async function sendEmail(req, res) {
         const { userHot } = require("../config/mail.json")
         const user = await modelUser.findOne({
             $or:[
-            { "email": cred },
-            { "userName": cred }
+            { email: cred },
+            { userName: cred }
         ]   
     })
-        const URL = "http://localhost:4000/"
+        const URL = "http://localhost:8080/"
 
     if(!user){
 
