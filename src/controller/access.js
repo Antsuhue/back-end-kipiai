@@ -125,7 +125,7 @@ async function sendEmail(req, res) {
 async function emailConfirmation (id, email){
 
     const { userHot } = require("../config/mail.json")
-    const URL = "http://localhost:4000/"
+    const URL = "http://localhost:8080/"
 
     try{
 
