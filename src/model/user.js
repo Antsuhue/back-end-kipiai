@@ -37,6 +37,10 @@ const user = new mongoose.Schema({
         type: Boolean,
         require: true
     },
+    admin:{
+        type: Boolean,
+        require: true
+    },
     emailConfirmed:{
         type: Boolean,
         require: true

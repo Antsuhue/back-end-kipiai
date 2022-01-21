@@ -60,6 +60,7 @@ async function createUsers(req, res) {
       pass: hash,
       approved: false,
       emailConfirmed: false,
+      admin:false
     });
 
     const doc = await createUser.save();
@@ -156,6 +157,8 @@ async function editUserEmail(req, res) {
 function changePermission(req, res) {
   const { action, userName } = req.body;
 
+  console.log(req.headers["authorization"])
+
   switch (action) {
     case "approve":
       approveUser(userName, res);
@@ -163,6 +166,7 @@ function changePermission(req, res) {
 
     case "disapprove":
       disapproveUser(userName, res);
+      break;
   }
 }
 

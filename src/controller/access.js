@@ -16,20 +16,22 @@ async function login (req, res) {
 
     const user = await modelUser.findOne({ userName: userName })
 
-
     const authPass = await bcrypt.compare(pass, user.pass)
 
     try{
         if (userName == user.userName && authPass == true){
             const id = user._id
+            const admin = user.admin
             if(user.approved == true){
-                const token = jwt.sign({ id }, process.env.SECRET, {
+                jwt.sign({ id, admin  }, process.env.SECRET, {
                     expiresIn: 10000
-                })
-
-                return res.status(200).json({
-                    auth: true,
-                    token: token    
+                }, (err, token) => {
+                    if(err){ console.log(err) }
+                    res.cookie("jwt", "Bearer "+token, {httpOnly:true, secure:true, maxAge: 3600000})
+                    return res.status(200).json({
+                        auth: true,
+                        token: token  
+                    })
                 })
             }else{
                 logsAccess(userName,`Administrator not approved user ${userName}`, "error")
@@ -58,7 +60,7 @@ async function login (req, res) {
     }
     catch(error){
         console.log(error);
-        return res.status(404).json({status:"Erro de autenticação usuario e senha não conferem!"})
+        return res.status(404).json({status:"Ocoerreu um erro ao realizar a atenticação!"})
     }
 }
 
@@ -125,7 +127,7 @@ async function sendEmail(req, res) {
 async function emailConfirmation (id, email){
 
     const { userHot } = require("../config/mail.json")
-    const URL = "http://localhost:8081/"
+    const URL = "http://localhost:8080/"
 
     try{
 

@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { verifyToken } = require("./middleware/jwt");
+const { verifyToken, verifyTokenADM } = require("./middleware/jwt");
 const { testGoogle } = require("./controller/google");
 const {
   login,
@@ -42,7 +42,18 @@ router.get("/testeList", verifyToken, (req, res) => {
   return res.status(200).json(lista);
 });
 
-router.put("/change_permission/", changePermission);
+router.get("/testeListADM", verifyTokenADM, (req, res) => {
+  const admin = req.admin
+  console.log(admin)
+  const lista = {
+    usuario1: "Anderson",
+    usuario2: "Guilherme",
+    usuario3: "teste"
+  };
+  return res.status(200).json(lista);
+});
+
+router.post("/change_permission/", changePermission);
 
 router.post("/forgot_password/", sendEmail);
 
