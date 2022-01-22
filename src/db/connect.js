@@ -8,7 +8,7 @@ var options = {
 }
 
 try {
-    mongoose.connect(uri, options)
+    mongoose.connect("mongodb+srv://anderson:doka1@tikos-project.ugnaf.gcp.mongodb.net/kipiai?retryWrites=true&w=majority", options)
     console.log("Banco conectado!");
     
 } catch (err) {

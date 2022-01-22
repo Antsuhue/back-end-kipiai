@@ -40,6 +40,9 @@ const user = new mongoose.Schema({
     emailConfirmed:{
         type: Boolean,
         require: true
+    },
+    admin:{
+        type: Boolean
     }
 })
 

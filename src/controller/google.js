@@ -1,5 +1,7 @@
 const google = require('googleapis')
 
+const view_id = "247206534"
+
 
 function testGoogle() {
 
@@ -15,7 +17,6 @@ function testGoogle() {
     console.log(oauth2Client)
     
 }
-
 
 module.exports = {
     testGoogle

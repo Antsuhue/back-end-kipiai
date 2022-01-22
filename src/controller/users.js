@@ -60,6 +60,7 @@ async function createUsers(req, res) {
       pass: hash,
       approved: false,
       emailConfirmed: false,
+      admin: false
     });
 
     const doc = await createUser.save();
@@ -99,57 +100,79 @@ async function findUser(req, res) {
 }
 
 async function deleteUser(req, res) {
-  const { id } = req.body;
-  console.log("params ->", id);
+  try {
+    const { id } = req.body;
+    console.log("params ->", id);
+    const callback = await modelUser.findByIdAndRemove({ _id: id });
+    const { userName } = callback;
+    logsAccess(userName, `${userName}'has deleted!`, "info");
+    return res
+      .status(200)
+      .json({ status: `Usuario ${userName} foi removido!` });
+  } catch (err) {
+    return res.status(400).json({ status: err });
+  }
+}
 
-  await modelUser.findByIdAndRemove(id)
+async function editName(req, res) {
+  const { id } = req.query;
+  const { nome } = req.body;
 
+  try {
+    const obj = { name: nome };
+
+    const user = await modelUser.findById(id)
+
+    if(user.name == nome){
+      return res.status(400).json({ status:false })
+    }
+
+    const callback = await modelUser.findByIdAndUpdate(id, obj);
+
+    logsAccess(callback.userName, `${callback.name} has change to ${nome.toLowerCase()}`, "info");
+
+    return res.status(200).json({ status: "Usuario atualizado!" });
+  } catch (err) {
+
+    console.log(err)
+
+    return res.status(400) 
+  }
 }
 
 async function editUserEmail(req, res) {
   const { id } = req.query;
   const { email } = req.body;
-
-  const user = await modelUser.findById(id);
-  const existEmail = await modelUser.findOne({ email: email });
-
   try {
-    if (!user) {
-      return res.status(404).json({ status: "Usuario não existe!" });
-    }
-
-    if (existEmail) {
-      return res
-        .status(400)
-        .json({ status: "E-mail em uso por outro usuário!" });
-    }
-
-    const updateObject = {
-      email: email,
-      approved: false,
+    const obj = {
+      email: email.toLowerCase(),
+      emailConfirmed: false,
     };
 
-    await modelUser.findByIdAndUpdate(id, updateObject, async (err, res) => {
-      if (err) {
-        return res
-          .status(200)
-          .json({ status: "Erro ao alterar o email de usuário!" });
-      }
-    });
+    if(user.name == nome){
+      return res.status(400).json({ status:false })
+    }
 
-    logsAccess(
-      user.userName,
-      `${user.userName}'s e-mail has change to ${email}`,
-      "info"
-    );
-    await logEmail(`${user.userName}'s e-mail has change to ${email}`);
-    return res
-      .status(200)
-      .json(
-        "E-mail alerado para com sucesso!, por favor verifique a caixa postal para relizar a confirmação de e-mail!"
-      );
+    const emailExist = await modelUser.findOne({ email:email.toLowerCase() })
+
+    if(emailExist){
+      return res
+      .status(400)
+      .json({
+        status:"E-mail já em uso!"
+      })
+    }
+
+    const callback = await modelUser.findByIdAndUpdate(id, obj);
+
+    console.log(callback)
+
+    logsAccess(callback.userName, `${callback.userName}'s e-mail has change to ${email.toLowerCase()}`, "info");
+
+    return res.status(200).json({ status: "email atualizado" });
   } catch (err) {
     console.log(err);
+    return res.status(400)
   }
 }
 
@@ -226,4 +249,5 @@ module.exports = {
   changePermission,
   listUsers,
   editUserEmail,
+  editName,
 };

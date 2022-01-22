@@ -16,6 +16,7 @@ const {
   changePermission,
   editUserEmail,
   listUsers,
+  editName
 } = require("./controller/users");
 
 router.get("/", (req, res) => {
@@ -26,9 +27,11 @@ router.post("/create_user", createUsers);
 
 router.post("/find_user", findUser)
 
-router.post("/deleteUser", deleteUser);
+router.post("/delete_user", deleteUser);
 
-router.post("/changeEmail", editUserEmail);
+router.put("/change_email", editUserEmail);
+
+router.put("/edit_name", editName)
 
 router.post("/login", login);
 

@@ -10,6 +10,8 @@ const { logMessageAccess, logEmail } = require("../controller/logsSlack")
 
 async function login (req, res) {
 
+    console.log("teste")
+
     let { userName, pass } = req.body
 
     userName = userName.toLowerCase()
