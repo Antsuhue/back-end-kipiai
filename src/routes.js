@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const { verifyToken, verifyTokenADM } = require("./middleware/jwt");
-const { testGoogle } = require("./controller/google");
+const { googleData } = require("./controller/google");
 const {
   login,
   sendEmail,
@@ -60,6 +60,8 @@ router.post("/verify/", setConfirmation);
 router.post("/change_password/", changePassword);
 
 router.get("/list_users", listUsers);
+
+router.get("/google", googleData)
 
 router.post("/logout", (req, res) => {
   res.json({ auth: false, token: null });

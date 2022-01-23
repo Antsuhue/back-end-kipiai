@@ -27,7 +27,6 @@ async function login (req, res) {
                     expiresIn: 10000
                 }, (err, token) => {
                     if(err){ console.log(err) }
-                    res.cookie("jwt", "Bearer "+token, {httpOnly:true, secure:true, maxAge: 3600000})
                     return res.status(200).json({
                         auth: true,
                         token: token  
