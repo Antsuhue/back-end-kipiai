@@ -32,8 +32,6 @@ router.post("/changeEmail", editUserEmail);
 
 router.post("/login", login);
 
-router.get("/tes", testGoogle);
-
 router.get("/testeList", verifyToken, (req, res) => {
   const lista = {
     usuario1: "Anderson",

@@ -1,22 +1,35 @@
-const google = require('googleapis')
+const { google } = require('googleapis')
+const scopes = 'https://www.googleapis.com/auth/analytics.readonly'
+const key = require("../config/auth.json")
+const jwt = new google.auth.JWT(key.client_email, null, key.private_key, scopes)
+require("dotenv");
 
+const view_id =  "156007659" //'247206534'
 
-function testGoogle() {
+listMetrics = ["adCost", "transactions"]
 
-    const clientID = process.env.CLIENT_ID
-    const clientSecret = process.env.CLIENT_SECRET
-    const callbackURL = 'http://localhost:4000/login/google/return'
-    const oauth2Client = new google.Auth.OAuth2Client(clientID, clientSecret, callbackURL)
-    const url = oauth2Client.generateAuthUrl({
-        access_type: 'online',
-        scope: 'https://www.googleapis.com/auth/analytics.readonly'
-    })
-    
-    console.log(oauth2Client)
-    
+async function getData(metrica) {
+  try{
+  const response = await jwt.authorize()
+  const result = await google.analytics('v3').data.ga.get({
+    'auth': jwt,
+    'ids': 'ga:' + view_id,
+    'start-date': '0daysAgo',
+    'end-date': 'today',
+    'metrics': "ga:"+metrica
+  })
+  console.log("metricas ad => ",result.data.rows[0][0])
+
+  return result.data.rows[0][0]
+
+}catch(error){
+  console.log(error);
+}
 }
 
+listMetrics.forEach(element => {
+    const result = getData(element)
 
-module.exports = {
-    testGoogle
-}
+});
+
+
