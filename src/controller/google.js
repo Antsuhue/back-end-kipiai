@@ -7,20 +7,31 @@ require("dotenv");
 const view_id =  "156007659" //'247206534'
 let obj = {}
 
-let listMetrics = ["adCost", "transactions"]
+let listMetrics = ["emplooyer","adCost", "transactions", "transactionRevenue"]
 
 async function getData(metrica) {
   try{
   const response = await jwt.authorize()
-  const result = await google.analytics('v3').data.ga.get({
+
+  objGoogle = {
     'auth': jwt,
     'ids': 'ga:' + view_id,
-    'start-date': '0daysAgo',
+    'start-date': '7daysAgo',
     'end-date': 'today',
     'metrics': "ga:"+metrica
-  })
+  }
 
-  return result.data.rows[0][0]
+  switch (metrica){
+    case "emplooyer":
+      objGoogle["metrics"] = "ga:adCost"
+      const result = await google.analytics('v3').data.ga.get(objGoogle)
+      return result.data.profileInfo.profileName
+  }
+  const result = await google.analytics('v3').data.ga.get(objGoogle)
+
+  let resGoogle = result.data.rows[0][0]
+
+  return resGoogle
 
 }catch(error){
   console.log(error);
@@ -28,11 +39,15 @@ async function getData(metrica) {
 }
 
 async function googleData(req,res){
-  listMetrics.forEach(async element => {
-    const data = await getData(element).then(result => {
-      obj[element] = result
-    })
+  const promises = await listMetrics.map(async element => {
+      const data = await getData(element)
+      obj[element] = data
   })
+
+  await Promise.all(promises)
+
+  obj["orderCost"] = parseFloat(obj["adCost"]/obj["transactions"]).toFixed(2)
+
   return res.status(200).json(obj)
   
 }
