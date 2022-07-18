@@ -1,0 +1,10 @@
+{
+    "host": "smtp.gmail.com",
+    "port": 2525,
+    "secure": true,
+    "user": "bff159fc0173f0",
+    "pass": "76af8ee13d623b",
+    "service": "gmail",
+    "userHot": "contatokipiai@gmail.com",
+    "passHot": "Kipiai@2021"
+}
