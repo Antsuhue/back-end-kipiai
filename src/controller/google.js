@@ -14,10 +14,10 @@ console.log("Dia Do mês =>", DayMonth)
 
 function idenfyEcommerce(goal){
   if (goal == 0){
-    listMetrics = ["emplooyer","adCost", "transactions", "transactionRevenue"]    
+    listMetrics = ["emplooyer","ga:adCost", "ga:transactions", "ga:transactionRevenue"]    
   }else{
-    let goalList = `Goal${goal}Completions`
-    listMetrics = ["emplooyer","adCost", "transactions", goalList]
+    let goalList = `ga:goal1completions` 
+    listMetrics = ["emplooyer","ga:adCost", "ga:transactions", goalList]
   }
 
   return listMetrics
@@ -34,7 +34,7 @@ console.log("Teste => "+viewId)
     'ids': 'ga:' +viewId,
     'start-date': DayMonth+'daysAgo',
     'end-date': 'yesterday',
-    'metrics': "ga:"+metrica, 
+    'metrics': metrica, 
     'filters':"ga:source==google;ga:medium==cpc"
   }
 
@@ -45,8 +45,10 @@ console.log("Teste => "+viewId)
       return result.data.profileInfo.profileName
   }
   const result = await google.analytics('v3').data.ga.get(objGoogle)
+  console.log(result.data.totalsForAllResults)
 
   return Object.values(result.data.totalsForAllResults)[0];
+
 
   // let resGoogle = result.data.rows[0][0]
 
@@ -59,6 +61,8 @@ console.log("Teste => "+viewId)
 
 async function googleData(viewId, goal){
 
+  let transactions
+
   listMetrics = idenfyEcommerce(goal)
 
   const promises = await listMetrics.map(async element => {
@@ -68,9 +72,12 @@ async function googleData(viewId, goal){
 
   await Promise.all(promises)
 
-  const adCost = parseFloat(obj["adCost"]).toFixed(2)
-  const transactions = parseFloat(obj["transactions"]).toFixed(2)
-
+  const adCost = parseFloat(obj["ga:adCost"]).toFixed(2)
+  if (goal == 0){
+    transactions = parseFloat(obj["ga:transactions"]).toFixed(2)
+  }else{
+    transactions = parseFloat(obj["ga:goal1completions"]).toFixed(2)
+  }
   obj["orderCost"] = adCost / transactions
 
   console.log(obj)

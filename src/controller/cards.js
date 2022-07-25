@@ -34,8 +34,9 @@ async function createCard(clientName,viewId, goal) {
             clientName: clientName,
             viewId: viewId,
             adCost: formatPrice(response.adCost),
+            revenue: formatPrice(goalList),
             costPerOrder: formatPrice(response.orderCost),
-            costPerConversion: formatPrice(goal / response.adCost),
+            costPerConversion: formatPrice(response.adCost / goalList),
             lastConsult: moment().format(),
             goalView: goal
         }
@@ -54,24 +55,29 @@ async function createCard(clientName,viewId, goal) {
 
 async function updateCard(viewId, goal){
 
+    let update
+
     const response = await google.googleData(viewId, goal) 
 
+    console.log("Resposta ->",  response["ga:orderCost"])
+
     if (goal == 0){
-        const update = {
-            adCost: formatPrice(response.adCost),
-            revenue: formatPrice(response.transactionRevenue),
+        update = {
+            adCost: formatPrice(response["ga:adCost"]),
+            revenue: formatPrice(response["ga:transactionRevenue"]),
             costPerOrder: formatPrice(response.orderCost),
-            costPerConversion: formatPrice(response.transactionRevenue / response.adCost),
+            costPerConversion: formatPrice(response["ga:transactionRevenue"] / response["ga:adCost"]),
             lastConsult: moment().format(),
             goal: goal
         }
     }else{
-        const update = {
-            adCost: formatPrice(response.adCost),
+        update = {
+            adCost: formatPrice(response["ga:adCost"]),
+            revenue: response.goalList,
             costPerOrder: formatPrice(response.orderCost),
-            costPerConversion: formatPrice(goal / response.adCost),
+            costPerConversion: formatPrice(response["ga:adCost"] / response.goalList),
             lastConsult: moment().format(),
-            goal: goal
+            goalView: goal
         }
     }
 
@@ -97,7 +103,7 @@ async function consultCard(req, res){
         const diference = now.diff(time, "hour")
 
         if (diference >= 1){
-        await updateCard(c.viewId)
+        await updateCard(c.viewId, c.goalView)
         }
     }else{
         
