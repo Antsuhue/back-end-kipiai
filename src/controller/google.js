@@ -78,7 +78,8 @@ async function googleData(viewId, goal){
   }else{
     transactions = parseFloat(obj["ga:goal1completions"]).toFixed(2)
   }
-  obj["orderCost"] = adCost / transactions
+  let result = adCost / transactions
+  obj["ga:orderCost"] = result.toString()
 
   console.log(obj)
 

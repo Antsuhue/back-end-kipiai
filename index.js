@@ -4,11 +4,16 @@ const cookieParser = require('cookie-parser')
 const db = require("./src/db/connect")
 const routes = require("./src/routes")
 const cors = require("cors")
+const cron = require("node-cron")
 require("dotenv/config")
+
 
 const app = express()
 const PORT = process.env.PORT
 
+cron.schedule("* * * * *", () =>
+    console.log("O guizão sumiu!")
+)
 
 app.use(cors())
 app.db = db

@@ -11,6 +11,10 @@ const views = new mongoose.Schema({
     goalView:{
         type: String,
         required: true
+    },
+    docId:{
+        type: String,
+        required: true
     }
     
 })

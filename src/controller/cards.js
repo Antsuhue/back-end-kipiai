@@ -3,6 +3,7 @@ const google = require("../controller/google")
 const modelUser = require("../model/user")
 const modelViews = require("../model/views")
 const moment = require("moment")
+const { getDataDoc } = require("../controller/planilhas")
 
 function formatPrice(value){
       const val = Number(value.toString().replace(",", "."));
@@ -11,21 +12,22 @@ function formatPrice(value){
       return valueString.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
     }
 
-async function createCard(clientName,viewId, goal) {
+async function createCard(clientName,viewId, goal, docId) {
 
     const response = await google.googleData(viewId, goal) 
 
     let cardObj = {}
-
+    console.log(response)
     if(goal == 0){
         cardObj = {
             clientName: clientName,
             viewId: viewId,
-            adCost: formatPrice(response.adCost),
-            revenue: formatPrice(response.transactionRevenue),
-            costPerOrder: formatPrice(response.orderCost),
-            costPerConversion: formatPrice(response.transactionRevenue / response.adCost),
+            adCost: formatPrice(response["ga:adCost"]),
+            revenue: formatPrice(response["ga:transactionRevenue"]),
+            costPerOrder: formatPrice(response["ga:orderCost"]),
+            costPerConversion: formatPrice(response["ga:transactionRevenue"] / response["ga:adCost"]),
             lastConsult: moment().format(),
+            docId: docId,
             goalView: goal
         }
     }
@@ -33,11 +35,12 @@ async function createCard(clientName,viewId, goal) {
         cardObj = {
             clientName: clientName,
             viewId: viewId,
-            adCost: formatPrice(response.adCost),
+            adCost: formatPrice(response["ga:adCost"]),
             revenue: formatPrice(goalList),
-            costPerOrder: formatPrice(response.orderCost),
-            costPerConversion: formatPrice(response.adCost / goalList),
+            costPerOrder: formatPrice(response["ga:orderCost"]),
+            costPerConversion: formatPrice(response["ga:adCost"] / goalList),
             lastConsult: moment().format(),
+            docId: docId,
             goalView: goal
         }
     }
@@ -65,7 +68,7 @@ async function updateCard(viewId, goal){
         update = {
             adCost: formatPrice(response["ga:adCost"]),
             revenue: formatPrice(response["ga:transactionRevenue"]),
-            costPerOrder: formatPrice(response.orderCost),
+            costPerOrder: formatPrice(response["ga:orderCost"]),
             costPerConversion: formatPrice(response["ga:transactionRevenue"] / response["ga:adCost"]),
             lastConsult: moment().format(),
             goal: goal
@@ -74,7 +77,7 @@ async function updateCard(viewId, goal){
         update = {
             adCost: formatPrice(response["ga:adCost"]),
             revenue: response.goalList,
-            costPerOrder: formatPrice(response.orderCost),
+            costPerOrder: formatPrice(response["ga:orderCost"]),
             costPerConversion: formatPrice(response["ga:adCost"] / response.goalList),
             lastConsult: moment().format(),
             goalView: goal
@@ -82,9 +85,39 @@ async function updateCard(viewId, goal){
     }
 
 
-    await modelCards.findOneAndUpdate({viewId:viewId},update)
+    const tes = await modelCards.findOneAndUpdate({viewId:viewId},update)
+    
+    console.log(tes)
 
-    return response
+    const dados = await getDataDoc(viewId)
+
+    const verifyDocData = {
+        "investimento":false,
+        "roi":false,
+        "receita":false
+    }
+
+    if (dados["Investimento"] <= tes["adCost"]){
+        verifyDocData["investimento"] = true
+    }
+    if (dados["ROI"] <= tes["costPerConversion"]){
+        verifyDocData["roi"] = true
+    }
+    if (dados["Receita"] <= tes["revenue"]){
+        verifyDocData["receita"] = true
+    }
+
+
+    const objResponse = {
+        "response": response,
+        "investimento": verifyDocData["investimento"] ,
+        "roi": verifyDocData["roi"],
+        "receita": verifyDocData["receita"] = true,
+    }
+
+    console.log("response", objResponse)
+
+    return objResponse
 }
 
 async function consultCard(req, res){
@@ -159,6 +192,10 @@ async function changeName(req, res){
         console.log(err)
         return res.status(500).json({"status":"Houve um erro ao relizar uma alteraçã tente novamente mais tarde!"})
     }
+}
+
+function reportCard(){
+    
 }
 
 

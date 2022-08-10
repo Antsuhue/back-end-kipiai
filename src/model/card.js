@@ -33,6 +33,10 @@ const card = new mongoose.Schema({
     goalView:{
         type: String,
         require: true
+    },
+    docId:{
+        type: String,
+        require: true
     }
 
     

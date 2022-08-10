@@ -25,6 +25,9 @@ const {
   updateViewList,
   deleteView
 } = require("./controller/views")
+const {
+  getDataDoc
+} = require("./controller/planilhas")
 
 router.get("/", (req, res) => {
   res.send("Hello World");
