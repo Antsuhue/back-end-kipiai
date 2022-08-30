@@ -12,6 +12,22 @@ function formatPrice(value){
       return valueString.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
     }
 
+async function validateDoc(viewId, obj){
+    const dados = await getDataDoc(viewId)
+
+    console.log((parseFloat(obj["adCost"].replace(".","").replace(",",".")) - parseFloat(dados["Investimento"])) / parseFloat(dados["Investimento"]))
+
+    const verifyDocData = {
+        "investimento":((parseFloat(obj["adCost"].replace(".","").replace(",",".")) - parseFloat(dados["Investimento"])) / parseFloat(dados["Investimento"])).toFixed(2),
+        "roi":((parseFloat(obj["costPerConversion"].replace(".","").replace(",",".")) - parseFloat(dados["ROI"]) ) / parseFloat(dados["ROI"])).toFixed(2),
+        "receita":((parseFloat(obj["revenue"].replace(".","").replace(",",".")) - parseFloat(dados["Receita"]) ) / parseFloat(dados["Receita"])).toFixed(2)
+    }
+
+    console.log("response", verifyDocData)
+
+    return verifyDocData
+}
+
 async function createCard(clientName,viewId, goal, docId) {
 
     const response = await google.googleData(viewId, goal) 
@@ -44,6 +60,12 @@ async function createCard(clientName,viewId, goal, docId) {
             goalView: goal
         }
     }
+
+    const resValidation = await validateDoc(viewId, cardObj)
+
+    cardObj["roi"] = resValidation.roi
+    cardObj["investment"] = resValidation.investimento
+    cardObj["recipe"] = resValidation.receita
 
     var newCard = new modelCards(cardObj)
     
@@ -84,40 +106,16 @@ async function updateCard(viewId, goal){
         }
     }
 
+    const resValidation = await validateDoc(viewId, update)
+
+    update["roi"] = resValidation.roi
+    update["investment"] = resValidation.investimento
+    update["recipe"] = resValidation.receita
+
+    console.log(update)
 
     const tes = await modelCards.findOneAndUpdate({viewId:viewId},update)
     
-    console.log(tes)
-
-    const dados = await getDataDoc(viewId)
-
-    const verifyDocData = {
-        "investimento":false,
-        "roi":false,
-        "receita":false
-    }
-
-    if (dados["Investimento"] <= tes["adCost"]){
-        verifyDocData["investimento"] = true
-    }
-    if (dados["ROI"] <= tes["costPerConversion"]){
-        verifyDocData["roi"] = true
-    }
-    if (dados["Receita"] <= tes["revenue"]){
-        verifyDocData["receita"] = true
-    }
-
-
-    const objResponse = {
-        "response": response,
-        "investimento": verifyDocData["investimento"] ,
-        "roi": verifyDocData["roi"],
-        "receita": verifyDocData["receita"] = true,
-    }
-
-    console.log("response", objResponse)
-
-    return objResponse
 }
 
 async function consultCard(req, res){

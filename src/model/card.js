@@ -37,6 +37,15 @@ const card = new mongoose.Schema({
     docId:{
         type: String,
         require: true
+    },
+    roi:{
+        type: String,
+    },
+    investment:{
+        type: String,
+    },
+    recipe:{
+        type: String,
     }
 
     
