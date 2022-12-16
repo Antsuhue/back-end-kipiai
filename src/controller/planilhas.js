@@ -1,7 +1,7 @@
 const { GoogleSpreadsheet } = require('google-spreadsheet');
 const credentials = require('../config/credentials.json')
 const modelViews = require("../model/views")
-//  1I45bx47twROBESppOCoU70tjGjj5xqs9kcKJ60qGYvs
+
 
 const getDoc = async (docId) => {
     const doc = new GoogleSpreadsheet(docId);
@@ -21,13 +21,18 @@ async function getDataDoc(viewId) {
 
     const doc = await getDoc(view.docId)
     const sheet = doc.sheetsByTitle["Resultado esperado"]
-    await sheet.loadCells('A1:E8')
+    await sheet.loadCells('A1:J8')
     objResponse = {
         "Investimento": sheet.getCellByA1('C8').formattedValue.replace(".","").replace(",",""),
         "ROI": sheet.getCellByA1('D8').formattedValue.replace(".","").replace(",",""),
-        "Receita": sheet.getCellByA1('E8').formattedValue.replace(".","").replace(",","") 
-    }
+        "Receita": sheet.getCellByA1('E8').formattedValue.replace(".","").replace(",","")
+    };
 
+    if(view.idFb != 0){
+        objResponse["fb_Investimento"] =sheet.getCellByA1('H8').formattedValue.replace(".","").replace(",",""),
+        objResponse["fb_ROI"] =sheet.getCellByA1('I8').formattedValue.replace(".","").replace(",",""),
+        objResponse["fb_Receita"] =sheet.getCellByA1('J8').formattedValue.replace(".","").replace(",","")
+    }
 
     return objResponse
 }

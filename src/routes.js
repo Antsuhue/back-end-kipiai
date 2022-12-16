@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const { verifyToken, verifyTokenADM } = require("./middleware/jwt");
 const { googleData } = require("./controller/google");
-const { consultCard, changeName, sendCards } = require("./controller/cards")
+const { consultCard, changeName, sendCards, listCards} = require("./controller/cards")
 const {
   login,
   sendEmail,
@@ -58,6 +58,7 @@ router.delete("/views/:id", deleteView)
 //Cards
 router.put("/card/:id", changeName)
 router.post("/card/send", sendCards)
+router.get("/cards", listCards)
 
 //Testes de rotas
 router.get("/testeList", verifyToken, (req, res) => {

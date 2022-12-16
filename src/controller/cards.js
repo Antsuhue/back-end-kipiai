@@ -6,15 +6,17 @@ const moment = require("moment")
 const mailer = require("../module/mailer")
 const { getDataDoc } = require("../controller/planilhas")
 const cron = require("node-cron")
+const { getFacebookData, facebookData } = require("../controller/facebook")
 
 function formatPrice(value){
+    if (value == NaN || value == undefined) return '0,00';
       const val = Number(value.toString().replace(",", "."));
       if (!val) return '0,00';
       const valueString = val.toFixed(2).replace(".", ",");
       return valueString.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
     }
 
-async function validateDoc(viewId, obj){
+async function validateDoc(viewId, obj, idFb){
     const dados = await getDataDoc(viewId)
 
     const verifyDocData = {
@@ -23,44 +25,78 @@ async function validateDoc(viewId, obj){
         "receita":((parseFloat(obj["revenue"].replace(".","").replace(",","")) - parseFloat(dados["Receita"]) ) / parseFloat(dados["Receita"])).toFixed(2)
     }
 
+    if(idFb != 0){
+        verifyDocData["fb_investimento"] = ((parseFloat(obj["fb_spend"].replace(".","").replace(",","")) - parseFloat(dados["fb_Investimento"])) / parseFloat(dados["fb_Investimento"])).toFixed(2),
+        verifyDocData["fb_roi"] = ((parseFloat(obj["fb_costPerConversion"].replace(".","").replace(",","")) - parseFloat(dados["fb_ROI"]) ) / parseFloat(dados["fb_ROI"])).toFixed(2),
+        verifyDocData["fb_receita"] = ((parseFloat(obj["fb_revenue"].replace(".","").replace(",","")) - parseFloat(dados["fb_Receita"]) ) / parseFloat(dados["fb_Receita"])).toFixed(2)
+        }
+
+
     console.log("response", verifyDocData)
 
     return verifyDocData
 }
 
-async function createCard(clientName,viewId, goal, docId) {
+async function createCard(clientName,viewId, goal, docId, idFb) {
+    
+    try {
+        const response = await google.googleData(viewId, goal)
 
-    const response = await google.googleData(viewId, goal) 
-    let cardObj = {} 
-    console.log(response)
-    if(goal == 0){
-        cardObj = {
-            clientName: clientName,
-            viewId: viewId,
-            adCost: formatPrice(response["ga:adCost"]),
-            revenue: formatPrice(response["ga:transactionRevenue"]),
-            costPerOrder: formatPrice(response["ga:orderCost"]),
-            costPerConversion: formatPrice(response["ga:transactionRevenue"] / response["ga:adCost"]),
-            lastConsult: moment().format(),
-            docId: docId,
-            goalView: goal
+        let cardObj = {} 
+        console.log(response)
+        if(goal == 0){
+            cardObj = {
+                clientName: clientName,
+                viewId: viewId,
+                adCost: formatPrice(response["ga:adCost"]),
+                revenue: formatPrice(response["ga:transactionRevenue"]),
+                costPerOrder: formatPrice(response["ga:orderCost"]),
+                costPerConversion: formatPrice(response["ga:transactionRevenue"] / response["ga:adCost"]),
+                lastConsult: moment().format(),
+                docId: docId,
+                goalView: goal
+            }
         }
-    }
-    else{
-        cardObj = {
-            clientName: clientName,
-            viewId: viewId,
-            adCost: formatPrice(response["ga:adCost"]),
-            revenue: formatPrice(response[`ga:goal${goal}completions`]),
-            costPerOrder: formatPrice(response["ga:orderCost"]),
-            costPerConversion: formatPrice(response["ga:adCost"] /response[`ga:goal${goal}completions`]),
-            lastConsult: moment().format(),
-            docId: docId,
-            goalView: goal
+        else{
+            cardObj = {
+                clientName: clientName,
+                viewId: viewId,
+                adCost: formatPrice(response["ga:adCost"]),
+                revenue: formatPrice(response["ga:transactions"]),
+                costPerOrder: formatPrice(response["ga:orderCost"]),
+                costPerConversion: formatPrice(response["ga:adCost"] /response["ga:transactions"]),
+                lastConsult: moment().format(),
+                docId: docId,
+                goalView: goal
+            }
         }
+        try{
+        if(idFb != 0){
+            const respFace = await facebookData(viewId, goal)
+            cardObj["idFb"] = idFb
+            getFacebookData(idFb).then(resp => {
+                cardObj["fb_spend"] = resp[0]["_data"]["spend"]
+                cardObj["fb_costPerOrder"] = formatPrice(cardObj["fb_spend"]/ respFace["ga:transactions"] )
+                if(goal == 0){
+                    cardObj["fb_revenue"] = formatPrice(respFace["ga:transactionRevenue"])
+                    cardObj["fb_costPerConversion"] = formatPrice(respFace["ga:transactionRevenue"] / cardObj["fb_spend"])
+                }
+                else{
+                    cardObj["fb_revenue"] = formatPrice(respFace["ga:transactions"])
+                    cardObj["fb_costPerConversion"] = formatPrice(cardObj["fb_spend"] / respFace["ga:transactions"])
+                }
+            })
+            }
+        }catch(err){
+         throw err
     }
 
-    const resValidation = await validateDoc(viewId, cardObj)
+    const resValidation = await validateDoc(viewId, cardObj, idFb)
+    if(idFb != 0){
+    cardObj["fb_investment"] = resValidation.fb_investimento
+    cardObj["fb_roi"] = resValidation.fb_roi
+    cardObj["fb_recipe"] = resValidation.fb_receita
+    }
 
     cardObj["roi"] = resValidation.roi
     cardObj["investment"] = resValidation.investimento
@@ -74,10 +110,12 @@ async function createCard(clientName,viewId, goal, docId) {
             resolve(console.log(newCard))
         }, 500)
     })
-
+} catch (err) {
+    throw err
+    } 
 }
 
-async function updateCard(viewId, goal){
+async function updateCard(viewId, goal, idFb){
 
     let update
 
@@ -97,21 +135,47 @@ async function updateCard(viewId, goal){
     }else{
         update = {
             adCost: formatPrice(response["ga:adCost"]),
-            revenue: formatPrice(response[`ga:goal${goal}completions`]),
+            revenue: formatPrice(response["ga:transactions"]),
             costPerOrder: formatPrice(response["ga:orderCost"]),
-            costPerConversion: formatPrice(response["ga:adCost"] / response[`ga:goal${goal}completions`]),
+            costPerConversion: formatPrice(response["ga:adCost"] / response["ga:transactions"]),//response[`ga:goal${goal}completions`]
             lastConsult: moment().format(),
             goalView: goal
         }
     }
+    try{
+        if(idFb != 0){
+            const respFace = await facebookData(viewId, goal)
+            update["idFb"] = idFb
+            getFacebookData(idFb).then(resp => {
+                update["fb_spend"] = resp[0]["_data"]["spend"]
+                update["fb_costPerOrder"] = formatPrice(update["fb_spend"]/ respFace["ga:transactions"] )
+                if(goal == 0){
+                    update["fb_revenue"] = formatPrice(respFace["ga:transactionRevenue"])
+                    update["fb_costPerConversion"] = formatPrice(respFace["ga:transactionRevenue"] / update["fb_spend"])
+                }
+                else{
+                    update["fb_revenue"] = formatPrice(respFace["ga:transactions"])
+                    update["fb_costPerConversion"] = formatPrice(update["fb_spend"] / respFace["ga:transactions"])
+                }
+            })
+            }
+        }catch(err){
+         throw err
+    }
 
-    const resValidation = await validateDoc(viewId, update)
-
+    const resValidation = await validateDoc(viewId, update, idFb)
+    if(idFb != 0){
+    update["fb_investment"] = resValidation.fb_investimento
+    update["fb_roi"] = resValidation.fb_roi
+    update["fb_recipe"] = resValidation.fb_receita
+}
     update["roi"] = resValidation.roi
     update["investment"] = resValidation.investimento
     update["recipe"] = resValidation.receita
 
     console.log(update)
+
+    await modelCards.findOneAndUpdate({viewId:viewId}, update)
     
 }
 
@@ -135,7 +199,7 @@ async function consultCard(req, res){
         }
     }else{
         
-        await createCard(c.clientName,c.viewId, c.goalView)
+        await createCard(c.clientName,c.viewId, c.goalView, c.docId, c.idFb)
 
     }
     })
@@ -204,6 +268,18 @@ async function sendCards(){
     })
 }
 
+async function listCards(req, res) {
+    try{
+    const cards = await modelCards.find();
+
+    return res.status(200).json(cards);
+  }catch(err){
+    console.log(err)
+    return res.status(500).json({"Status":"Ocorreu um erro durante o processamentos dos cards",
+    "Err":err})
+}
+
+}
 cron.schedule("0 12 * * *", async () =>
 {
     //await sendCards()
@@ -211,8 +287,19 @@ cron.schedule("0 12 * * *", async () =>
     }
 )
 
+cron.schedule("0 * *  * *", async () =>{
+    const cards = await modelCards.find()
+
+    cards.forEach(c => {
+        updateCard(c.viewId, c.goalView, c.idFb)
+    })
+}
+)
+
+
 module.exports = {
     consultCard,
     changeName,
-    sendCards
+    sendCards,
+    listCards
 }

@@ -33,8 +33,10 @@ async function getData(metrica, viewId) {
     'ids': 'ga:' +viewId,
     'start-date': DayMonth+'daysAgo',
     'end-date': 'yesterday',
-    'metrics': metrica, 
-    'filters':"ga:source==google;ga:medium==cpc"
+    'metrics': metrica,
+    'filters':"ga:sourceMedium=~(google / cpc)"
+
+   //'filters':"ga:source==google;ga:medium==cpc"
   }
 
   switch (metrica){
@@ -67,11 +69,15 @@ async function googleData(viewId, goal){
   await Promise.all(promises)
 
   const adCost = parseFloat(obj["ga:adCost"]).toFixed(2)
+
   if (goal == 0){
     transactions = parseFloat(obj["ga:transactions"]).toFixed(2)
-  }else{
+  }
+  
+  else{
     transactions = parseFloat(obj[`ga:goal${goal}completions`]).toFixed(2)
   }
+
   let result = adCost / transactions
   obj["ga:orderCost"] = result.toString()
 

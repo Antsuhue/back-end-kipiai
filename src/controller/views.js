@@ -3,13 +3,14 @@ const modelUsers = require("../model/user")
 const modelCards = require("../model/card")
 
 async function insertViews(req, res){
-    const { viewId, clientName, goalView, docId } = req.body
+    const { viewId, clientName, goalView, docId, idFb } = req.body
 
     const objView = {
         viewId,
         clientName,
         goalView,
-        docId
+        docId,
+        idFb
     }
 
     const newView = new modelViews (objView)

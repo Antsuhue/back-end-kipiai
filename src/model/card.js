@@ -46,9 +46,41 @@ const card = new mongoose.Schema({
     },
     recipe:{
         type: String,
+    },
+    idFb:{
+        type: String,
+        require: true,
+    },
+    fb_spend:{
+        type: String,
+        require: true,
+    },
+    fb_costPerConversion:{
+        type: String,
+        require: true
+    },
+    fb_costPerOrder:{
+        type: String,
+        require: true
+    },
+    fb_revenue:{
+        type: String,
+        require: true
+    },
+    fb_roi:{
+        type: String,
+        require: true
+    },
+    fb_investment:{
+        type: String,
+        require: true
+    },
+    fb_recipeyyt:{
+        type: String,
+        require: true
     }
 
-    
+ 
 })
 
 const Card = mongoose.model("cards", card, "cards")
