@@ -1,3 +1,4 @@
+'use strict';
 const moment = require("moment")
 const bizSdk = require('facebook-nodejs-business-sdk');
 const AdSet = bizSdk.AdSet;
@@ -5,7 +6,7 @@ const AdsInsights = bizSdk.AdsInsights;
 const env = process.env
 const app_secret = '217124367d64c5091dd71ba2e377b9d5'; //Senha da aplicação, ultilizada na estenção facebook-nodejs-business-sdk
 const app_id = '878884062162011'; // Id da aplicação, ultilizada na estenção facebook-nodejs-business-sdk
-const access_token = 'EAAMfVyRS7FsBADFmQkr9sjZBiKsJVJBrnpKG7ml8gG8ZABZCopUgEOZB4ZC1Di9ZBTfbMbm6bqq1QMMaY3PXMAAA1m26LqdVy6COSnrOnh8cEafJjwgYFHZANBciYsH3TXApS9dmMg8ImZB97cqaKVxwdKAlrYamWcs3APhHMoHZCteCWfbzflyzuPDJf8lr90MAZD';
+const access_token = "EAAMfVyRS7FsBAHCIAUlxmNqt6yn51qAo2PDQplYGlyj2WYrQHv4uqKGGC9HkCKyb8DI8apDLAIooHvxlfcXDMLPKS8jho1fCKVm1TvSllZAuY32bWV3MpOZBuWTbimxWNLBTbst0gEe1ulZBZAy6NlxWSmEKPVbZA5pxykho2XARFe5EH4m42eFfZCZBBS6XZBkZD" //'EAAMfVyRS7FsBADFmQkr9sjZBiKsJVJBrnpKG7ml8gG8ZABZCopUgEOZB4ZC1Di9ZBTfbMbm6bqq1QMMaY3PXMAAA1m26LqdVy6COSnrOnh8cEafJjwgYFHZANBciYsH3TXApS9dmMg8ImZB97cqaKVxwdKAlrYamWcs3APhHMoHZCteCWfbzflyzuPDJf8lr90MAZD';
 
 const showDebugingInfo = false; // Definir isso como true mostra mais informações de depuração/expurgação.
 
@@ -21,7 +22,8 @@ let listMetrics = []
 let DayMonth = moment().format("DD")-1;
 
 async function getFacebookData(idFb){
-//Id Do Cliente, valor imutar
+
+//w/Id Do Cliente, valor imutar
 //'act_1018569841540901';
 const api = await bizSdk.FacebookAdsApi.init(access_token);
 // if (showDebugingInfo) {
@@ -75,7 +77,7 @@ async function getData(metrica, viewId) {
   console.log("Teste => "+viewId)
 
   try{
-  objFacebook = {
+  let objFacebook = {
     'auth': jwt,
     'ids': 'ga:' +viewId,
     'start-date': DayMonth+'daysAgo',

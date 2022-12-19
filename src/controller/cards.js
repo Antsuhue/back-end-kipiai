@@ -47,6 +47,7 @@ async function createCard(clientName,viewId, goal, docId, idFb) {
         if(goal == 0){
             cardObj = {
                 clientName: clientName,
+                idFb: idFb,
                 viewId: viewId,
                 adCost: formatPrice(response["ga:adCost"]),
                 revenue: formatPrice(response["ga:transactionRevenue"]),
@@ -61,6 +62,7 @@ async function createCard(clientName,viewId, goal, docId, idFb) {
             cardObj = {
                 clientName: clientName,
                 viewId: viewId,
+                idFb: idFb,
                 adCost: formatPrice(response["ga:adCost"]),
                 revenue: formatPrice(response["ga:transactions"]),
                 costPerOrder: formatPrice(response["ga:orderCost"]),
@@ -72,8 +74,7 @@ async function createCard(clientName,viewId, goal, docId, idFb) {
         }
         try{
         if(idFb != 0){
-            const respFace = await facebookData(viewId, goal)
-            cardObj["idFb"] = idFb
+            const respFace = await facebookData(viewId, goal)   
             getFacebookData(idFb).then(resp => {
                 cardObj["fb_spend"] = resp[0]["_data"]["spend"]
                 cardObj["fb_costPerOrder"] = formatPrice(cardObj["fb_spend"]/ respFace["ga:transactions"] )
@@ -195,7 +196,7 @@ async function consultCard(req, res){
         const diference = now.diff(time, "hour")
 
         if (diference >= 0){
-        await updateCard(c.viewId, c.goalView)
+        await updateCard(c.viewId, c.goalView, c.idFb)
         }
     }else{
         
